@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/g-ram84/teenieapp/issues"
   },
-  "homepage": "https://github.com/g-ram84/teenieapp#readme"
+  "homepage": "https://github.com/g-ram84/teenieapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
