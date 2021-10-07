@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/g-ram84/teenieapp#readme",
   "dependencies": {
+    "ejs": "^3.1.6",
     "express": "^4.17.1"
   }
 }
