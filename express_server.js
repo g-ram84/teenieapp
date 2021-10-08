@@ -51,9 +51,19 @@ app.get("/urls/:shortURL", (req, res) => {
 	res.render("urls_show", templateVars);
 });
 
+app.get("/u/:shortURL", (req, res) => {
+	const shortURL = req.params.shortURL;
+	const longURL = urlDatabase[shortURL];
+	res.redirect(longURL);
+});
+
 app.post("/urls/", (req, res) => {
 	let shortURL = generateRandomString();
-	urlDatabase[shortURL] = req.body.longURL;
+	let longURL = req.body.longURL;
+	if (!/^https?:\/\//i.test(longURL)) {
+		longURL = "http://" + longURL;
+	}
+	urlDatabase[shortURL] = longURL;
 	res.redirect(`/urls/${shortURL}`);
 });
 
