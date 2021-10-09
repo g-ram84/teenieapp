@@ -23,6 +23,19 @@ const urlDatabase = {
 	"9sm5xK": "http://www.google.ca"
 };
 
+const users = {
+	userRandomID: {
+		id: "userRandomID",
+		email: "user@example.com",
+		password: "purple-monkey-dinosaur"
+	},
+	user2RandomID: {
+		id: "user2RandomID",
+		email: "user2@example.com",
+		password: "dishwasher-funk"
+	}
+};
+
 app.get("/", (req, res) => {
 	res.send("Hello!");
 });
@@ -64,6 +77,13 @@ app.get("/u/:shortURL", (req, res) => {
 	const shortURL = req.params.shortURL;
 	const longURL = urlDatabase[shortURL];
 	res.redirect(longURL);
+});
+
+app.get("/register", (req, res) => {
+	const templateVars = {
+		username: req.cookies.username
+	};
+	res.render("registration", templateVars);
 });
 
 app.post("/urls/", (req, res) => {
