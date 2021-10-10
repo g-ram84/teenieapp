@@ -28,6 +28,22 @@ function checkEmail(email) {
 	return;
 }
 
+function getUserByEmail(email, data) {
+	for (let user in data) {
+		if (email === data[user].email) {
+			return data[user];
+		}
+	}
+	return undefined;
+}
+
+function passCheck(user, password) {
+	if (user.password === password) {
+		return true;
+	}
+	return false;
+}
+
 const urlDatabase = {
 	b2xVn2: "http://www.lighthouselabs.ca",
 	"9sm5xK": "http://www.google.ca"
@@ -100,6 +116,14 @@ app.get("/register", (req, res) => {
 	res.render("registration", templateVars);
 });
 
+app.get("/login", (req, res) => {
+	const userCookies = req.cookies.user_id;
+	const templateVars = {
+		userID: userCookies
+	};
+	res.render("login", templateVars);
+});
+
 app.post("/urls/", (req, res) => {
 	let shortURL = generateRandomString();
 	let longURL = req.body.longURL;
@@ -124,8 +148,28 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-	res.cookie("username", req.body.login);
-	res.redirect("/urls");
+	const emailInput = req.body.email;
+	const passwordInput = req.body.password;
+	const loggedInUser = {
+		email: emailInput,
+		passwordInput: passwordInput
+	};
+	const user = getUserByEmail(emailInput, users);
+	if (typeof user !== "undefined") {
+		const userPass = passCheck(user, passwordInput);
+		if (userPass) {
+			res.cookie("user_id", loggedInUser);
+			res.redirect("/urls");
+		} else {
+			res
+				.status(403)
+				.send("Incorrect email/password combination.  Please try again");
+			return;
+		}
+	} else {
+		res.status(403).send("User not found.  Please Register");
+		return;
+	}
 });
 
 app.post("/logout", (req, res) => {
@@ -137,8 +181,6 @@ app.post("/register", (req, res) => {
 	const userID = generateRandomString();
 	const email = req.body.email;
 	const password = req.body.password;
-	users[userID] = { id: userID, email, password };
-	res.cookie("user_id", users[userID]);
 	if (email.length === 0 || password.length === 0) {
 		res.status(400).send("Email and Password must not be blank");
 		return;
@@ -146,6 +188,8 @@ app.post("/register", (req, res) => {
 		res.status(400).send("Email address already in system");
 		return;
 	}
+	users[userID] = { id: userID, email, password };
+	res.cookie("user_id", users[userID]);
 	res.redirect("/urls");
 });
 
