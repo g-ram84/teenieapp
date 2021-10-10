@@ -18,6 +18,16 @@ function generateRandomString() {
 	return result;
 }
 
+function checkEmail(email) {
+	for (let user in users) {
+		console.log(users[user].email);
+		if (users[user].email === email) {
+			return true;
+		}
+	}
+	return;
+}
+
 const urlDatabase = {
 	b2xVn2: "http://www.lighthouselabs.ca",
 	"9sm5xK": "http://www.google.ca"
@@ -49,26 +59,29 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+	const userCookies = req.cookies.user_id;
 	const templateVars = {
 		urls: urlDatabase,
-		username: req.cookies.username
+		userID: userCookies
 	};
 	res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
+	const userCookies = req.cookies.user_id;
 	const templateVars = {
-		username: req.cookies.username
+		userID: userCookies
 	};
 	res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
 	const shortURL = req.params.shortURL;
+	const userCookies = req.cookies.user_id;
 	const templateVars = {
 		shortURL,
 		longURL: urlDatabase[shortURL],
-		username: req.cookies.username
+		userID: userCookies
 	};
 	res.render("urls_show", templateVars);
 });
@@ -80,8 +93,9 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
+	const userCookies = req.cookies.user_id;
 	const templateVars = {
-		username: req.cookies.username
+		userID: userCookies
 	};
 	res.render("registration", templateVars);
 });
@@ -115,8 +129,24 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-	res.clearCookie("username");
+	res.clearCookie("user_id");
 	res.redirect("/urls/new");
+});
+
+app.post("/register", (req, res) => {
+	const userID = generateRandomString();
+	const email = req.body.email;
+	const password = req.body.password;
+	users[userID] = { id: userID, email, password };
+	res.cookie("user_id", users[userID]);
+	if (email.length === 0 || password.length === 0) {
+		res.status(400).send("Email and Password must not be blank");
+		return;
+	} else if (checkEmail(email)) {
+		res.status(400).send("Email address already in system");
+		return;
+	}
+	res.redirect("/urls");
 });
 
 app.listen(PORT, () => {
